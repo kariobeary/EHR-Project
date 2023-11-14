@@ -22,6 +22,8 @@ data <- read.csv()
 lm
 
 ?plot
+
+?plot
 ```
 
 ## Including Plots
