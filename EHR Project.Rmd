@@ -16,10 +16,10 @@ library(ggplot2)
 data <- read.csv()
 ```
 
-## 
+## Logistic Regression
 
-```{r cars}
-summary(cars)
+```{r }
+lm
 ```
 
 ## Including Plots
