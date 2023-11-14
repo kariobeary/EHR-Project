@@ -20,6 +20,8 @@ data <- read.csv()
 
 ```{r }
 lm
+
+?plot
 ```
 
 ## Including Plots
