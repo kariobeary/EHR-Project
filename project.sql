@@ -3,12 +3,13 @@ use fegbe2;
 ## STUDY POPULATION: ------------------------------------------------------
 # PATIENTS WITH DMII ('E11%') DIAGNOSED BEFORE 2018
 # NEW: associated/secondary diagnosis of T2D ('E11%')
-#      AND any LTI diabetic diagnosis (LTI_NUM = 8 AND LTI_ICD_REASON like 'E11%')
+#      OR any LTI diabetic diagnosis (LTI_NUM = 8 OR LTI_ICD_REASON like 'E11%')
 
 SELECT *
 FROM tab_hospitalisation th, tab_mso_ass_dgn tmad 
 WHERE th.ETA_NUM = tmad.ETA_NUM AND th.RSA_NUM = tmad.RSA_NUM 
-AND DGN_ASS like 'E11%'
+AND (DGN_ASS like 'E11%' OR
+	HOSP_MAIN_DGN like 'E11%')
 AND YEAR(HOSP_START_DATE) < 2018;
 
 SELECT *
