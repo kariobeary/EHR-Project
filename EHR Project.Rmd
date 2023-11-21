@@ -1,5 +1,6 @@
 ---
 title: "EHR Project"
+author: "Alisha Dziarski, Kari Guo & Susie Wang"
 output: html_document
 date: "`r Sys.Date()`"
 ---
@@ -50,13 +51,13 @@ class(hosp$HOSP_END_DATE)
 
 # Combine T2D patients from LTI and from hospitalizations ------------
 diab <- full_join(diab_h, diab_l, by = "PAT_ID")
+
+
+# New dataframe for diabetes prescriptions ---------------------------
+pres_diab <- pres %>% filter(str_detect(DRUG_ATC_C07, "A10A") |
+                               str_detect(DRUG_ATC_C07, "A10B"))
+table(pres_diab$DRUG_ATC_C07)   # double-check that A10As and A10Bs have been selected
 ```
-
-```{r}
-
-```
-
-
 
 ## Logistic Regression
 
