@@ -6,15 +6,57 @@ date: "`r Sys.Date()`"
 
 ```{r Setup}
 library(tidyverse)
-library(dplyr)
+library(lubridate)
 library(survival)
 library(epiR)
 library(epiDisplay)
 library(cmprsk)
 library(ggplot2)
-
-data <- read.csv()
 ```
+
+```{r Data Import}
+hosp <- read.csv("hospitalisation_2018-2020.csv")
+pres <- read.csv("prescription_2018-2020.csv")
+diab_h <- read.csv("diabetes_hosp_2018-2020.csv")
+diab_l <- read.csv("diabetes_lti_2018-2020.csv")
+```
+
+```{r Data Cleaning}
+## Convert date columns to date format---------------------------------
+
+# Diabetic patients
+diab_h$HOSP_START_DATE <- date(diab_h$HOSP_START_DATE)
+diab_h$HOSP_END_DATE <- date(diab_h$HOSP_END_DATE)
+
+diab_l$LTI_START_DATE <- date(diab_l$LTI_START_DATE)
+diab_l$LTI_END_DATE <- date(diab_l$LTI_END_DATE)
+
+# ALL prescriptions
+pres$PRS_DATE <- date(pres$PRS_DATE)
+
+# ALL Hospitalizations
+hosp$HOSP_START_DATE <- date(hosp$HOSP_START_DATE)
+hosp$HOSP_END_DATE <- date(hosp$HOSP_END_DATE)
+
+# Check that format of these columns are now dates
+class(diab_h$HOSP_START_DATE)
+class(diab_h$HOSP_END_DATE)
+class(diab_l$LTI_START_DATE)
+class(diab_l$LTI_END_DATE)
+class(pres$PRS_DATE)
+class(hosp$HOSP_START_DATE)
+class(hosp$HOSP_END_DATE)
+
+
+# Combine T2D patients from LTI and from hospitalizations ------------
+diab <- full_join(diab_h, diab_l, by = "PAT_ID")
+```
+
+```{r}
+
+```
+
+
 
 ## Logistic Regression
 
