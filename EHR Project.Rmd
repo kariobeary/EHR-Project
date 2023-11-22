@@ -13,6 +13,7 @@ library(epiR)
 library(epiDisplay)
 library(cmprsk)
 library(ggplot2)
+library(lme4)
 ```
 
 ```{r Data Import}
@@ -57,35 +58,113 @@ diab <- full_join(diab_h, diab_l, by = "PAT_ID")
 pres_diab <- pres %>% filter(str_detect(DRUG_ATC_C07, "A10A") |
                                str_detect(DRUG_ATC_C07, "A10B"))
 table(pres_diab$DRUG_ATC_C07)   # double-check that A10As and A10Bs have been selected
+
+#Join the diagnostic data with the prescription data by PAT_ID
+full <- full_join(diab, pres_diab, by = "PAT_ID")
+full$PAT_ID <- as.character(full$PAT_ID)
+
+class(full)
+dim(full)
+
+#Clean out unnecessary columns 
+
+
+
 ```
 
 ## Logistic Regression
+Logistic regression will then be performed with the explanatory variable being the four geographic areas, and the response variable being the binary outcome of the presence of at least one anti-diabetic drug prescription during the study period. An unadjusted model will be first conducted to investigate to understand an overall association between the geographic location of the patient and the presence of anti-diabetic drug prescription. A multivariate logistic regression will then be performed with age and sex as covariates to understand the impact of age and sex and confounders. The unadjusted and multivariate logistic models will then be compared to understand the impact of geographic location of diabetic patients on the prescription and intake of anti-diabetic drugs with and without the presence of confounders.  
 
 ```{r Hospitalization}
+#Recode hospitalization into binary variable 
+full$hospitalization <- full$HOSP_START_DATE
+full$hospitalization <- ifelse(is.na(full$HOSP_START_DATE), 0, 1)
 
+#Apply generalized linear model, currently using PAT_ID, but to replace with geographic area.
+m1 <- glm(hospitalization~PAT_ID, data=full, family = "binomial")
+summary(m1)
+
+#Multivariate logistic regression
+m2 <- glm(hospitalization~PAT_ID+age+sex, data=full, family="binomial")
+summary(m2)
 ```
 
 
 ```{r Prescription}
+#Recode prescription into binary variable 
+full$prescription <- full$DRUG_NAME
+full$prescription <- ifelse(is.na(full$prescription), 0, 1)
 
+#Apply generalized linear model, currently using PAT_ID, but to replace with geographic area.
+m3 <- glm(prescription~PAT_ID, data=full, family = "binomial")
+summary(m3)
+
+#Multivariate logistic regression
+m4 <- glm(prescription~PAT_ID+age+sex, data=full, family="binomial")
+summary(m4)
 ```
 
 ## Survival Analysis 
+Aalen-Johansen estimation will be conducted to understand how the probabilities of anti-diabetic drug prescription and hospitalization change with time after DMII diagnosis. In both research questions, death will be the only competing risk considered. Cox proportional hazard models will then be performed for each research question. The hospitalization hazard among diabetic patients from different geographic areas of France will be compared with left truncation by age, considering hospitalizations within the study period. Additionally, a comparative time to first prescription of diabetes medication will be investigated with a Cox model left truncating by date of diagnosis. Assumptions of the Cox proportional hazard models will be checked to ensure the proper application of the models. The hazard ratios obtained, with their p-values and CIs will be interpreted and compared to better understand the impact of geographic residence of diabetic patients on the wait time for the initial prescription of anti-diabetic drugs and hospitalization, with age and sex potentially being the covariates.  
 
 ```{r Survival Analysis}
+#Calculate time passed since DMII diagnosis for hospitalization 
 
+#Calculate time passed since DMII diagnosis for prescription
+
+#Fit Aalen-Johansen estimator for hospitalization
+fit1 <- aareg(Surv(full$diagnosistime, full$status) ~ full$group) #group would be death or hospitalization
+
+#Plot the cumulative incidence functions
+plot(fit1, main = "Aalen-Johansen Cumulative Incidence Functions", col = c("red", "blue"))
+legend("topright", legend = c("Death", "Hospitalization"), col = c("red", "blue"), lty = 1)
+
+p1 <- ggsurvplot(fit = fit1, # Kaplan Meier survival model
+                 data = full,
+                 fun = "cumhaz", # "cumulative hazard" function
+                 title = "'Survival Analysis' on the Prescription of Anti-diabetic Drugs and Hospitalization", #plot title
+                 legend.labs = c("Prescription","Hospitalization"),    # Change legend labels
+                 censor = F, # don't show censoring timepoints on the plot
+                 xlab = "Time since DMII Diagnosis"
+) 
+
+p1
 ```
 
 ## Linear Regression 
+A linear regression will be used to investigate the impact of geographic location of the diabetic patients on the secondary outcome, the number of hospitalizations. Potential confounders considered include age and sex.  
 
 ```{r Hospitalization}
+#Calculate the number of hospitalizations 
 
+#unadjusted linear model
+l1 <- lm(num~area, full)
+summary(l1)
+
+#adjusted linear model 
+l2 <- lm(num~area+age+sex, full)
+summary(l2)
 ```
 
 ## Mixed Models 
+Mixed model will be performed to understand the association between the number of hospitalization and the duration of each hospitalization stratified by each geographic area of the diabetic patients. Potential confounders include age, sex, and number of prescriptions.  
 
 ```{r Mixed Models}
+#
+m1 <- lmer(CD4~T+(1|NUM_PAT), albi, REML=0)
+m1
+summary(m1)
 
+m2 <- lmer(CD4~T+(T|NUM_PAT), albi, REML=0)
+m2
+summary(m2)
+
+# Run the mixed model for t that gives random intercept and random slope but no covariance between random intercept and random slope
+m3 <- lmer(CD4~T+(1|NUM_PAT)+(0+T|NUM_PAT), albi, REML=0)
+m3
+summary(m3)
+
+anova(m10)
 ```
 
 ## Sensitivity Analysis 
