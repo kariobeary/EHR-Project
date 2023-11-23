@@ -64,6 +64,15 @@ WHERE YEAR(HOSP_START_DATE) > 2018 AND YEAR (HOSP_START_DATE) < 2021;
 
 
 
+## TAB_PATIENT ------------------------------------------------------
+# all patients whose death date is null OR after the beginning of the study period
+
+SELECT *
+FROM tab_patient tp 
+WHERE YEAR(PAT_DEATH_DATE) > 2018 OR PAT_DEATH_DATE IS NULL;
+
+
+
 /*
 # MERGE THE 2  ------------------------------------------------------
 SELECT t1.PAT_ID as 'drug_PAT_ID', t1.DRUG_ATC_C07, t1.PAT_DPT_RES, t2.PAT_ID as 't2d_PAT_ID'
