@@ -21,10 +21,15 @@ hosp <- read.csv("hospitalisation_2018-2020.csv")
 pres <- read.csv("prescription_2018-2020.csv")
 diab_h <- read.csv("diabetes_hosp_2018-2020.csv")
 diab_l <- read.csv("diabetes_lti_2018-2020.csv")
+pat <- read.csv("tab_patient.csv")
 ```
 
 ```{r Data Cleaning}
 ## Convert date columns to date format---------------------------------
+
+# ALL patients
+pat$PAT_BIRTH_DATE <- date(pat$PAT_BIRTH_DATE)
+pat$PAT_DEATH_DATE <- date(ifelse(pat$PAT_DEATH_DATE == "", NA, pat$PAT_DEATH_DATE))
 
 # Diabetic patients
 diab_h$HOSP_START_DATE <- date(diab_h$HOSP_START_DATE)
