@@ -132,13 +132,9 @@ hosp <- full_join(hosp, hosp_sum, by = "PAT_ID")
 # Combine T2D patients from LTI and from 
 diab <- full_join(diab_h, diab_l, by = "PAT_ID")
 
-# New dataframe for diabetes prescriptions
-pres_diab <- pres %>% filter(str_detect(DRUG_ATC_C07, "A10A") |
-                               str_detect(DRUG_ATC_C07, "A10B"))
-table(pres_diab$DRUG_ATC_C07)   # double-check that A10As and A10Bs have been selected
-
 # Find the patient information that only has a diagbetic diagnosis 
 diagnostic <- inner_join(pat, diab, by="PAT_ID")
+dim(diagnostic)
 
 # Join the prescription with patient data by PAT_ID
 prescription <- full_join(diagnostic, pres, by = "PAT_ID")
@@ -146,6 +142,10 @@ prescription$PAT_ID <- as.character(prescription$PAT_ID)
 
 class(prescription)
 dim(prescription)
+
+## Clean up the dataframes 
+prescription <- prescription %>% 
+  dplyr::select(-c(2:3))
 
 ```
 
@@ -169,8 +169,9 @@ summary(g2)
 
 ```{r Prescription}
 #Recode prescription into binary variable 
-prescription$pres <- prescription$DRUG_NAME
-prescription$pres <- ifelse(is.na(prescription$pres), 0, 1)
+prescription$pres <- prescription$DRUG_ATC_C07
+prescription$pres <- ifelse(str_detect(prescription$DRUG_ATC_C07, "A10"), 1, 0)
+prescription$pres <- ifelse(is.na(prescription$DRUG_NAME), 0, prescription$pres)
 
 #Apply generalized linear model, currently using PAT_ID, but to replace with geographic area.
 g3 <- glm(pres~PAT_DPT_GRP, data=prescription, family = "binomial")
@@ -186,7 +187,7 @@ A linear regression will be used to investigate the impact of geographic locatio
 
 ```{r Hospitalization}
 #Calculate the number of hospitalizations 
-hospitalization <- full_join(diagnostic, hosp, by="PAT_ID")
+hospitalization <- inner_join(diagnostic, hosp, by="PAT_ID")
 
 #unadjusted linear model
 l1 <- lm(NUM_HOSP~PAT_DPT_GRP, data=hospitalization)
@@ -205,17 +206,17 @@ hospitalization$PAT_ID <- as.character(hospitalization$PAT_ID)
 
 # Run the mixed model for different geographic departments only 
 # only random intercept
-m1 <- lmer(HOSP_DUR~PAT_DPT_GRP+(1|PAT_ID), hospitalization, REML=0)
+m1 <- lmer(HOSP_DUR~NUM_HOSP+(1|PAT_ID), hospitalization, REML=0)
 m1
 summary(m1)
 
 # random intercept + random slope
-m2 <- lmer(HOSP_DUR~PAT_DPT_GRP+(PAT_DPT_GRP|PAT_ID), hospitalization, REML=0)
+m2 <- lmer(HOSP_DUR~NUM_HOSP+(NUM_HOSP|PAT_ID), hospitalization, REML=0)
 m2
 summary(m2)
 
 # Run the mixed model for the duration of hospitalization that gives random intercept and random slope but no covariance between random intercept and random slope
-m3 <- lmer(HOSP_DUR~PAT_DPT_GRP+(1|PAT_ID)+(0+PAT_DPT_GRP|PAT_ID), hospitalization, REML=0)
+m3 <- lmer(HOSP_DUR~NUM_HOSP+(1|PAT_ID)+(0+NUM_HOSP|PAT_ID), hospitalization, REML=0)
 m3
 summary(m3)
 
@@ -227,7 +228,7 @@ anova(m3)
 # From the result, it seems there is very little difference between m2 and m3. 
 
 # Therefore, to answer the study question, add number of hospitalization to the equation
-m4 <- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+(1|PAT_ID)+(0+PAT_DPT_GRP|PAT_ID), hospitalization, REML=0)
+m4 <- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+(NUM_HOSP|PAT_ID), hospitalization, REML=0)
 m4
 summary(m4)
 ```
