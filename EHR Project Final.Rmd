@@ -237,13 +237,7 @@ summary(m4)
 ## Sensitivity Analysis 
 ```{r sensitivity analysis}
 # with all potential confounders 
-m5 <- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+PAT_AGE+PAT_SEX_COD+(1|PAT_ID)+(0+PAT_DPT_GRP|PAT_ID), hospitalization, REML=0)
+m5 <- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+PAT_AGE+PAT_SEX_COD++(NUM_HOSP|PAT_ID), hospitalization, REML=0)
 m5
 summary(m5)
-
-# with only age and sex as confounders -- Q: I wonder if this is necessary and whether it answers our question
-m6 <- lmer(HOSP_DUR~PAT_DPT_GRP+PAT_AGE+PAT_SEX_COD+(1|PAT_ID)+(0+PAT_DPT_GRP|PAT_ID), hospitalization, REML=0)
-m6
-summary(m6)
-
 ```
