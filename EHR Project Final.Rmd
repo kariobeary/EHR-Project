@@ -126,6 +126,22 @@ hosp_sum <- hosp_freq %>% group_by(PAT_ID) %>%
 
 hosp <- full_join(hosp, hosp_sum, by = "PAT_ID")
 
+## Clean up the dataframes -------------------------------------------
+# Prescription table
+pres <- pres %>% 
+  dplyr::select(-c("DRUG_CIP7.1","DRUG_BIG_PACK","DRUG_FRM_GAL","DRUG_LAB_ID","PRS.KEY.1","PRS_HP_COD","PRS_NAT"))
+
+# Hospitalization table
+hops <- hosp %>% 
+  dplyr::select(-c("ETA_NUM","RSA_NUM","HOSP_ENT_MODE","HOSP_ENT_ORIGIN","HOSP_EXIT_MODE","HOSP_EXIT_DEST"))
+
+# Patient table 
+pat <- pat %>% 
+  dplyr::select(-c("PAT_HEA_INSUR","PAT_LOC_IRIS"))
+
+# Diabetic Patient Table
+diab <- diab %>% 
+  dplyr::select(-c("ETA_NUM","RSA_NUM","HOSP_ENT_MODE","HOSP_ENT_ORIGIN","HOSP_EXIT_MODE","HOSP_EXIT_DEST","ETA_NUM.1","RSA_NUM.1"))
 
 ## COMBINING DATAFRAMES ----------------------------------------------
 
@@ -142,10 +158,6 @@ prescription$PAT_ID <- as.character(prescription$PAT_ID)
 
 class(prescription)
 dim(prescription)
-
-## Clean up the dataframes 
-prescription <- prescription %>% 
-  dplyr::select(-c(2:3))
 
 ```
 
@@ -221,23 +233,25 @@ m3
 summary(m3)
 
 # Comparing the 3 models to decide the best model 
-anova(m1)
-anova(m2)
-anova(m3)
+anova(m1,m2)
+anova(m1,m3)
+anova(m2,m3)
 
-# From the result, it seems there is very little difference between m2 and m3. 
+# From the result, we don't see lots of differences among the 3 models. By BIC, m2 has the lowest BIC and AIC so we chose m2 as our final model.
 
-# Therefore, to answer the study question, add number of hospitalization to the equation
-m4 <- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+(NUM_HOSP|PAT_ID), hospitalization, REML=0)
-m4
-summary(m4)
 ```
 
 
 ## Sensitivity Analysis 
 ```{r sensitivity analysis}
-# with all potential confounders 
+# Adding the geographic departments to the equation to see if there is any change in the results. 
+m4 <- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+(NUM_HOSP|PAT_ID), hospitalization, REML=0)
+m4
+summary(m4)
+
+# With all potential confounders 
 m5 <- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+PAT_AGE+PAT_SEX_COD++(NUM_HOSP|PAT_ID), hospitalization, REML=0)
 m5
 summary(m5)
+
 ```
