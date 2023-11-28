@@ -297,7 +297,7 @@ summary(m4)
 confint(m4)
 
 # With all potential confounders 
-m5 <- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+PAT_AGE+PAT_SEX_COD+(1|PAT_ID), hospitalization, REML=0)
+m5 <- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+PAT_AGE+PAT_SEX_COD+(1|PAT_ID),hospitalization, REML=0)
 m5
 summary(m5)
 confint(m5)
