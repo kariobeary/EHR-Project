@@ -3,14 +3,14 @@ title: "EHR Project"
 author: "Alisha Dziarski, Kari Guo & Susie Wang"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
   html_document: default
 ---
 
 ```{r Setup, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(lubridate)
-library(survival)
+library(gtsummary)
+library(kableExtra)
 library(epiR)
 library(epiDisplay)
 library(cmprsk)
@@ -129,7 +129,7 @@ hosp <- full_join(hosp, hosp_sum, by = "PAT_ID")
 
 ## COMBINING DATAFRAMES ----------------------------------------------
 
-# Combine T2D patients from LTI and from 
+# Combine T2D patients from LTI and from hospitalization with T2D
 diab <- full_join(diab_h, diab_l, by = "PAT_ID")
 
 ## Clean up the dataframes -------------------------------------------
@@ -168,6 +168,35 @@ class(prescription$PAT_AGE)
 class(diagnostic$PAT_SEX_COD)
 diagnostic$PAT_ID<- as.character(diagnostic$PAT_ID)
 diagnostic$PAT_SEX_COD <- as.character(diagnostic$PAT_SEX_COD)
+```
+
+```{r Table1}
+## Using gtsummary
+diagnostic %>% dplyr::select("PAT_DPT_GRP", "PAT_AGE", "PAT_SEX_COD") %>% 
+  tbl_summary(by = "PAT_DPT_GRP")
+
+diagnostic %>% group_by(PAT_DPT_GRP) %>% 
+  summarize(minAge = min(PAT_AGE), maxAge = max(PAT_AGE))
+
+## OR using kable
+summary_table <- diagnostic %>%
+  group_by(PAT_DPT_GRP) %>%
+  summarize(Median_Age = median(PAT_AGE, na.rm = TRUE),
+            Number_of_Males = sum(PAT_SEX_COD == 1, na.rm = TRUE),
+            Percent_Males = (Number_of_Males / n()) * 100) %>%
+  mutate('Number Males (%)' = paste0(Number_of_Males, " (",
+                                     sprintf("%.1f%%", Percent_Males), ")")) %>%
+  dplyr::select(-Number_of_Males, -Percent_Males)  # Drop intermediate columns
+
+# Renaming columns
+colnames(summary_table) <- c("Patient Location", "Median Age", "Percent Male (%)")
+
+# Rename locations 
+summary_table[1:6, 1] <- c("Ile de France", "Northeast", "Northwest",
+                           "Other", "Southeast", "Southwest")
+
+# Display the table using kable
+print(kable(summary_table, caption = "Patient Characteristics Grouped by Location"))
 ```
 
 ## Logistic Regression
@@ -254,19 +283,22 @@ anova(m1,m2)
 anova(m1,m3)
 anova(m2,m3)
 
-# From the result, we don't see lots of differences among the 3 models. By BIC, m2 has the lowest BIC and AIC so we chose m2 as our final model.
+# From the result, we don't see lots of differences among the 3 models. Therefore, after considering the necessity of random slope, we decided to simplify the model to only include the random intercept. 
+confint(m1)
 ```
 
 ## Sensitivity Analysis 
 
 ```{r sensitivity analysis}
 # Adding the geographic departments to the equation to see if there is any change in the results. 
-m4 <- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+(NUM_HOSP|PAT_ID), hospitalization, REML=0)
+m4 <- lmer(HOSP_DUR~NUM_HOSP+PAT_DPT_GRP+(1|PAT_ID), hospitalization, REML=0)
 m4
 summary(m4)
+confint(m4)
 
 # With all potential confounders 
-m5 <- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+PAT_AGE+PAT_SEX_COD++(NUM_HOSP|PAT_ID), hospitalization, REML=0)
+m5 <- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+PAT_AGE+PAT_SEX_COD+(1|PAT_ID), hospitalization, REML=0)
 m5
 summary(m5)
+confint(m5)
 ```
