@@ -5,7 +5,7 @@ output: html_document
 date: "`r Sys.Date()`"
 ---
 
-```{r Setup}
+```{r Setup, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(lubridate)
 library(survival)
@@ -53,10 +53,10 @@ pat <- pat %>% add_column(PAT_DPT_GRP = NA, .after = "PAT_DPT_RES")
 
 table(pat$PAT_DPT_RES)   # check unique values
 
-pat$PAT_DPT_GRP <- ifelse(pat$PAT_DPT_RES %in% c("2", "8", "10", "21", "25",
-                                                 "39", "51", "52", "54", "55",
-                                                 "57", "59", "62", "67", "68",
-                                                 "70", "71", "88", "90"), "NE",
+pat$PAT_DPT_GRP <- ifelse(pat$PAT_DPT_RES %in% c("2", "8", "10", "21", "25", "39",
+                                                 "51", "52", "54", "55", "57",
+                                                 "59", "62", "67", "68", "70",
+                                                 "71", "88", "89", "90"), "NE",
        ifelse(pat$PAT_DPT_RES %in% c("14", "18", "22", "27", "28", "29", "35", "37",
                                      "41", "44", "45", "49", "50", "53", "56", "58",
                                      "60", "61", "72", "76", "80", "85"), "NW",
@@ -67,13 +67,13 @@ pat$PAT_DPT_GRP <- ifelse(pat$PAT_DPT_RES %in% c("2", "8", "10", "21", "25",
                                                    "23", "24", "31", "32", "33",
                                                    "36", "40", "46", "47", "48",
                                                    "64", "65", "79", "81", "82",
-                                                   "86", "87", "89", "209"), "SW",
-                            ifelse(pat$PAT_DPT_RES %in% c("20", "75", "77", "78", "91",
-                                                          "92", "93", "94", "95"), "IF",
-                                   ifelse(pat$PAT_DPT_RES %in% c("0", "97", "971",
-                                                                 "972", "973", "974",
-                                                                 "978", "999"), "Other",
-                                          "Unknown"))))))
+                                                   "86", "87"), "SW",
+                            ifelse(pat$PAT_DPT_RES %in% c("75", "77", "78", "91", "92",
+                                                          "93", "94", "95"), "IF",
+                                   ifelse(pat$PAT_DPT_RES %in% c("0", "20", "97", "209",
+                                                                 "971", "972", "973",
+                                                                 "974", "978", "999"),
+                                          "Other", "Unknown"))))))
 
 # check which depts are still missing groupings
 pat %>% filter(PAT_DPT_GRP == "Unknown") %>% 
@@ -98,12 +98,6 @@ class(diab_l$LTI_END_DATE)
 
 # Convert date columns to date format
 pres$PRS_DATE <- date(pres$PRS_DATE)
-
-first_prs <- pres %>% group_by(PAT_ID) %>% 
-  summarise("1ST_PRS_DATE" = min(PRS_DATE))
-
-unique(first_prs$`1ST_PRS_DATE`)   # 1st date of Rx is same for all patients
-pres$`1ST_PRS_DATE` <- date("2019-01-09")   # assign same date for 1st Rx to all patients
 
 
 ## HOSPITALIZATION table ----------------------------------------------
@@ -168,7 +162,7 @@ dim(prescription)
 ## Logistic Regression
 Logistic regression will then be performed with the explanatory variable being the four geographic areas, and the response variable being the binary outcome of the presence of at least one anti-diabetic drug prescription during the study period. An unadjusted model will be first conducted to investigate to understand an overall association between the geographic location of the patient and the presence of anti-diabetic drug prescription. A multivariate logistic regression will then be performed with age and sex as covariates to understand the impact of age and sex and confounders. The unadjusted and multivariate logistic models will then be compared to understand the impact of geographic location of diabetic patients on the prescription and intake of anti-diabetic drugs with and without the presence of confounders.  
 
-```{r Hospitalization-Logic}
+```{r Hospitalization-Logistic}
 #Recode hospitalization into binary variable 
 diagnostic$hosp <- diagnostic$HOSP_START_DATE
 diagnostic$hosp <- ifelse(is.na(diagnostic$HOSP_START_DATE), 0, 1)
@@ -182,8 +176,7 @@ g2 <- glm(hosp~PAT_DPT_GRP+PAT_AGE+PAT_SEX_COD, data=diagnostic, family="binomia
 summary(g2)
 ```
 
-
-```{r Prescription}
+```{r Prescription-Logistic}
 #Recode prescription into binary variable 
 prescription$pres <- prescription$DRUG_ATC_C07
 prescription$pres <- ifelse(str_detect(prescription$DRUG_ATC_C07, "A10"), 1, 0)
@@ -245,8 +238,8 @@ anova(m2,m3)
 
 ```
 
-
 ## Sensitivity Analysis 
+
 ```{r sensitivity analysis}
 # Adding the geographic departments to the equation to see if there is any change in the results. 
 m4 <- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+(NUM_HOSP|PAT_ID), hospitalization, REML=0)
@@ -257,5 +250,4 @@ summary(m4)
 m5 <- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+PAT_AGE+PAT_SEX_COD++(NUM_HOSP|PAT_ID), hospitalization, REML=0)
 m5
 summary(m5)
-
 ```
