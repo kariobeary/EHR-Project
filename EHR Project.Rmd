@@ -30,18 +30,21 @@ pat <- read.csv("tab_patient.csv")
 # Convert date columns to date format
 pat$PAT_BIRTH_DATE <- date(pat$PAT_BIRTH_DATE)
 
-# Status indicator at end of study (0 = alive, 1 = death)
-pat$STATUS <- ifelse(pat$PAT_DEATH_DATE == "", 0, 1)
-
 # create placeholder death date for NAs to calculate age at end of study period
 unique(pat$PAT_DEATH_DATE)   # 2020-12-31 is a death date so will set 2021-01-01 as placeholder
 
 pat$PAT_DEATH_DATE <- date(ifelse(pat$PAT_DEATH_DATE == "",
                                   "2021-01-01", pat$PAT_DEATH_DATE))
+dates <- pat$PAT_DEATH_DATE
+dates[dates >= ymd("2021-01-01")] <- ymd("2021-01-01")
+pat$PAT_DEATH_DATE <- dates
 
 # Calculate age at death or age at end of study period
 pat$PAT_AGE <- as.double(difftime(pat$PAT_DEATH_DATE, pat$PAT_BIRTH_DATE,
                                   units = "weeks")) / 52
+
+# Status indicator at end of study (0 = alive, 1 = death)
+pat$STATUS <- ifelse(pat$PAT_DEATH_DATE == "2021-01-01", 0, 1)
 
 # Group by geographic area(Northeast, Northwest, Southeast, Southwest,
 # Île-de-France, French territory islands (3-digits))
