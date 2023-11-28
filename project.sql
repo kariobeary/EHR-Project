@@ -49,7 +49,7 @@ AND PAT_ID IN(SELECT tlti.PAT_ID
 	FROM tab_long_term_illness tlti, tab_hospitalisation th, tab_mso_ass_dgn tmad 
 	WHERE tlti.PAT_ID = th.PAT_ID AND th.ETA_NUM = tmad.ETA_NUM AND th.RSA_NUM = tmad.RSA_NUM 
 	AND (DGN_ASS like 'E11%' OR	HOSP_MAIN_DGN like 'E11%'
-	OR LTI_NUM = 8 OR LTI_ICD_REASON like 'E11%')
+	OR LTI_NUM = 8 AND LTI_ICD_REASON like 'E11%')
 	AND YEAR(HOSP_START_DATE) < 2018)
 AND YEAR(tp.PRS_DATE) > 2018 AND YEAR(tp.PRS_DATE) < 2021;
 
