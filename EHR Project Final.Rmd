@@ -1,8 +1,10 @@
 ---
 title: "EHR Project"
 author: "Alisha Dziarski, Kari Guo & Susie Wang"
-output: html_document
 date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r Setup, message=FALSE, warning=FALSE}
@@ -158,6 +160,14 @@ prescription$PAT_ID <- as.character(prescription$PAT_ID)
 class(prescription)
 dim(prescription)
 
+# Make sure all the data we need are in the correct format 
+prescription$PAT_ID <- as.character(prescription$PAT_ID)
+prescription$PAT_SEX_COD <- as.character(prescription$PAT_SEX_COD)
+class(prescription$PAT_AGE)
+
+class(diagnostic$PAT_SEX_COD)
+diagnostic$PAT_ID<- as.character(diagnostic$PAT_ID)
+diagnostic$PAT_SEX_COD <- as.character(diagnostic$PAT_SEX_COD)
 ```
 
 ## Logistic Regression
@@ -171,10 +181,14 @@ diagnostic$hosp <- ifelse(is.na(diagnostic$HOSP_START_DATE), 0, 1)
 #Apply generalized linear model
 g1 <- glm(hosp~PAT_DPT_GRP, data=diagnostic, family = "binomial")
 summary(g1)
+r1 <- exp(g1$coefficients)
+c1 <- exp(confint(g1))
+cbind(OR=r1, c1)
 
 #Multivariate logistic regression
 g2 <- glm(hosp~PAT_DPT_GRP+PAT_AGE+PAT_SEX_COD, data=diagnostic, family="binomial")
 summary(g2)
+cbind(OR=exp(g2$coefficients),exp(confint(g2)))
 ```
 
 ```{r Prescription-Logistic}
@@ -186,10 +200,12 @@ prescription$pres <- ifelse(is.na(prescription$DRUG_NAME), 0, prescription$pres)
 #Apply generalized linear model
 g3 <- glm(pres~PAT_DPT_GRP, data=prescription, family = "binomial")
 summary(g3)
+cbind(OR=exp(g3$coefficients),exp(confint(g3)))
 
 #Multivariate logistic regression
 g4 <- glm(pres~PAT_DPT_GRP+PAT_AGE+PAT_SEX_COD, data=prescription, family="binomial")
 summary(g4)
+cbind(OR=exp(g4$coefficients),exp(confint(g4)))
 ```
 
 ## Linear Regression 
@@ -197,15 +213,18 @@ A linear regression will be used to investigate the impact of geographic locatio
 
 ```{r Hospitalization-Linear}
 #Calculate the number of hospitalizations 
+hosp$PAT_ID <- as.character(hosp$PAT_ID)
 hospitalization <- inner_join(diagnostic, hosp, by="PAT_ID")
 
 #unadjusted linear model
 l1 <- lm(NUM_HOSP~PAT_DPT_GRP, data=hospitalization)
 summary(l1)
+cbind(Coefficient=l1$coefficient, confint(l1))
 
 #adjusted linear model 
 l2 <- lm(NUM_HOSP~PAT_DPT_GRP+PAT_AGE+PAT_SEX_COD, data=hospitalization)
 summary(l2)
+cbind(Coefficient=l2$coefficient, confint(l2))
 ```
 
 ## Mixed Models 
@@ -236,7 +255,6 @@ anova(m1,m3)
 anova(m2,m3)
 
 # From the result, we don't see lots of differences among the 3 models. By BIC, m2 has the lowest BIC and AIC so we chose m2 as our final model.
-
 ```
 
 ## Sensitivity Analysis 
