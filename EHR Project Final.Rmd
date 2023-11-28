@@ -30,14 +30,18 @@ pat <- read.csv("tab_patient.csv")
 # Convert date columns to date format
 pat$PAT_BIRTH_DATE <- date(pat$PAT_BIRTH_DATE)
 
-# Status indicator at end of study (0 = alive, 1 = death)
-pat$STATUS <- ifelse(pat$PAT_DEATH_DATE == "", 0, 1)
-
 # create placeholder death date for NAs to calculate age at end of study period
 unique(pat$PAT_DEATH_DATE)   # 2020-12-31 is a death date so will set 2021-01-01 as placeholder
 
 pat$PAT_DEATH_DATE <- date(ifelse(pat$PAT_DEATH_DATE == "",
                                   "2021-01-01", pat$PAT_DEATH_DATE))
+
+dates <- pat$PAT_DEATH_DATE
+dates[dates >= ymd("2021-01-01")] <- ymd("2021-01-01")
+pat$PAT_DEATH_DATE <- dates
+
+# Status indicator at end of study (0 = alive, 1 = death)
+pat$STATUS <- ifelse(pat$PAT_DEATH_DATE == "", 0, 1)
 
 # Calculate age at death or age at end of study period
 pat$PAT_AGE <- as.double(difftime(pat$PAT_DEATH_DATE, pat$PAT_BIRTH_DATE,
@@ -126,10 +130,15 @@ hosp_sum <- hosp_freq %>% group_by(PAT_ID) %>%
 
 hosp <- full_join(hosp, hosp_sum, by = "PAT_ID")
 
+## COMBINING DATAFRAMES ----------------------------------------------
+
+# Combine T2D patients from LTI and from 
+diab <- full_join(diab_h, diab_l, by = "PAT_ID")
+
 ## Clean up the dataframes -------------------------------------------
 # Prescription table
 pres <- pres %>% 
-  dplyr::select(-c("DRUG_CIP7.1","DRUG_BIG_PACK","DRUG_FRM_GAL","DRUG_LAB_ID","PRS.KEY.1","PRS_HP_COD","PRS_NAT"))
+  dplyr::select(-c("DRUG_CIP7.1","DRUG_BIG_PACK","DRUG_FRM_GAL","DRUG_LAB_ID","PRS_HP_COD","PRS_NAT"))
 
 # Hospitalization table
 hops <- hosp %>% 
@@ -142,11 +151,6 @@ pat <- pat %>%
 # Diabetic Patient Table
 diab <- diab %>% 
   dplyr::select(-c("ETA_NUM","RSA_NUM","HOSP_ENT_MODE","HOSP_ENT_ORIGIN","HOSP_EXIT_MODE","HOSP_EXIT_DEST","ETA_NUM.1","RSA_NUM.1"))
-
-## COMBINING DATAFRAMES ----------------------------------------------
-
-# Combine T2D patients from LTI and from 
-diab <- full_join(diab_h, diab_l, by = "PAT_ID")
 
 # Find the patient information that only has a diagbetic diagnosis 
 diagnostic <- inner_join(pat, diab, by="PAT_ID")
@@ -164,7 +168,7 @@ dim(prescription)
 ## Logistic Regression
 Logistic regression will then be performed with the explanatory variable being the four geographic areas, and the response variable being the binary outcome of the presence of at least one anti-diabetic drug prescription during the study period. An unadjusted model will be first conducted to investigate to understand an overall association between the geographic location of the patient and the presence of anti-diabetic drug prescription. A multivariate logistic regression will then be performed with age and sex as covariates to understand the impact of age and sex and confounders. The unadjusted and multivariate logistic models will then be compared to understand the impact of geographic location of diabetic patients on the prescription and intake of anti-diabetic drugs with and without the presence of confounders.  
 
-```{r Hospitalization}
+```{r Hospitalization-Logic}
 #Recode hospitalization into binary variable 
 diagnostic$hosp <- diagnostic$HOSP_START_DATE
 diagnostic$hosp <- ifelse(is.na(diagnostic$HOSP_START_DATE), 0, 1)
@@ -197,7 +201,7 @@ summary(g4)
 ## Linear Regression 
 A linear regression will be used to investigate the impact of geographic location of the diabetic patients on the secondary outcome, the number of hospitalizations. Potential confounders considered include age and sex.  
 
-```{r Hospitalization}
+```{r Hospitalization-Linear}
 #Calculate the number of hospitalizations 
 hospitalization <- inner_join(diagnostic, hosp, by="PAT_ID")
 
