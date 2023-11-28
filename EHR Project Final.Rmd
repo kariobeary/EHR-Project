@@ -70,7 +70,8 @@ pat$PAT_DPT_GRP <- ifelse(pat$PAT_DPT_RES %in% c("2", "8", "10", "21", "25", "39
                                                    "86", "87"), "SW",
                             ifelse(pat$PAT_DPT_RES %in% c("75", "77", "78", "91", "92",
                                                           "93", "94", "95"), "IF",
-                                   ifelse(pat$PAT_DPT_RES %in% c("0", "20", "97", "209",
+                                   ifelse(pat$PAT_DPT_RES %in% c("0", "20", "97",
+                                                                 "98", "99", "209",
                                                                  "971", "972", "973",
                                                                  "974", "978", "999"),
                                           "Other", "Unknown"))))))
@@ -167,7 +168,7 @@ Logistic regression will then be performed with the explanatory variable being t
 diagnostic$hosp <- diagnostic$HOSP_START_DATE
 diagnostic$hosp <- ifelse(is.na(diagnostic$HOSP_START_DATE), 0, 1)
 
-#Apply generalized linear model, currently using PAT_ID, but to replace with geographic area.
+#Apply generalized linear model
 g1 <- glm(hosp~PAT_DPT_GRP, data=diagnostic, family = "binomial")
 summary(g1)
 
@@ -182,7 +183,7 @@ prescription$pres <- prescription$DRUG_ATC_C07
 prescription$pres <- ifelse(str_detect(prescription$DRUG_ATC_C07, "A10"), 1, 0)
 prescription$pres <- ifelse(is.na(prescription$DRUG_NAME), 0, prescription$pres)
 
-#Apply generalized linear model, currently using PAT_ID, but to replace with geographic area.
+#Apply generalized linear model
 g3 <- glm(pres~PAT_DPT_GRP, data=prescription, family = "binomial")
 summary(g3)
 
