@@ -449,7 +449,8 @@ table(pat$PAT_DPT_RES)   # check unique values</code></pre>
                                                    &quot;86&quot;, &quot;87&quot;), &quot;SW&quot;,
                             ifelse(pat$PAT_DPT_RES %in% c(&quot;75&quot;, &quot;77&quot;, &quot;78&quot;, &quot;91&quot;, &quot;92&quot;,
                                                           &quot;93&quot;, &quot;94&quot;, &quot;95&quot;), &quot;IF&quot;,
-                                   ifelse(pat$PAT_DPT_RES %in% c(&quot;0&quot;, &quot;20&quot;, &quot;97&quot;, &quot;209&quot;,
+                                   ifelse(pat$PAT_DPT_RES %in% c(&quot;0&quot;, &quot;20&quot;, &quot;97&quot;,
+                                                                 &quot;98&quot;, &quot;99&quot;, &quot;209&quot;,
                                                                  &quot;971&quot;, &quot;972&quot;, &quot;973&quot;,
                                                                  &quot;974&quot;, &quot;978&quot;, &quot;999&quot;),
                                           &quot;Other&quot;, &quot;Unknown&quot;))))))
@@ -457,9 +458,8 @@ table(pat$PAT_DPT_RES)   # check unique values</code></pre>
 # check which depts are still missing groupings
 pat %&gt;% filter(PAT_DPT_GRP == &quot;Unknown&quot;) %&gt;% 
   distinct(PAT_DPT_RES)</code></pre>
-<pre><code>##   PAT_DPT_RES
-## 1          99
-## 2          98</code></pre>
+<pre><code>## [1] PAT_DPT_RES
+## &lt;0 rows&gt; (or 0-length row.names)</code></pre>
 <pre class="r"><code># Diabetic patients -- convert date columns to date format
 diab_h$HOSP_START_DATE &lt;- date(diab_h$HOSP_START_DATE)
 diab_h$HOSP_END_DATE &lt;- date(diab_h$HOSP_END_DATE)
@@ -565,7 +565,7 @@ of anti-diabetic drugs with and without the presence of confounders.</p>
 diagnostic$hosp &lt;- diagnostic$HOSP_START_DATE
 diagnostic$hosp &lt;- ifelse(is.na(diagnostic$HOSP_START_DATE), 0, 1)
 
-#Apply generalized linear model, currently using PAT_ID, but to replace with geographic area.
+#Apply generalized linear model
 g1 &lt;- glm(hosp~PAT_DPT_GRP, data=diagnostic, family = &quot;binomial&quot;)
 summary(g1)</code></pre>
 <pre><code>## 
@@ -573,22 +573,21 @@ summary(g1)</code></pre>
 ## glm(formula = hosp ~ PAT_DPT_GRP, family = &quot;binomial&quot;, data = diagnostic)
 ## 
 ## Coefficients:
-##                    Estimate Std. Error z value Pr(&gt;|z|)   
-## (Intercept)         0.58779    0.21082   2.788   0.0053 **
-## PAT_DPT_GRPNE       0.23639    0.31936   0.740   0.4592   
-## PAT_DPT_GRPNW      -0.15247    0.30717  -0.496   0.6196   
-## PAT_DPT_GRPOther    0.87855    0.49957   1.759   0.0786 . 
-## PAT_DPT_GRPSE       0.04218    0.27518   0.153   0.8782   
-## PAT_DPT_GRPSW       0.22796    0.32734   0.696   0.4862   
-## PAT_DPT_GRPUnknown  1.02165    1.11555   0.916   0.3598   
+##                  Estimate Std. Error z value Pr(&gt;|z|)   
+## (Intercept)       0.58779    0.21082   2.788   0.0053 **
+## PAT_DPT_GRPNE     0.23639    0.31936   0.740   0.4592   
+## PAT_DPT_GRPNW    -0.15247    0.30717  -0.496   0.6196   
+## PAT_DPT_GRPOther  0.90029    0.46857   1.921   0.0547 . 
+## PAT_DPT_GRPSE     0.04218    0.27518   0.153   0.8782   
+## PAT_DPT_GRPSW     0.22796    0.32734   0.696   0.4862   
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
 ##     Null deviance: 658.50  on 517  degrees of freedom
-## Residual deviance: 652.05  on 511  degrees of freedom
-## AIC: 666.05
+## Residual deviance: 652.07  on 512  degrees of freedom
+## AIC: 664.07
 ## 
 ## Number of Fisher Scoring iterations: 4</code></pre>
 <pre class="r"><code>#Multivariate logistic regression
@@ -600,24 +599,23 @@ summary(g2)</code></pre>
 ##     data = diagnostic)
 ## 
 ## Coefficients:
-##                    Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)        -5.90583    0.76021  -7.769 7.93e-15 ***
-## PAT_DPT_GRPNE       0.35849    0.39949   0.897    0.370    
-## PAT_DPT_GRPNW      -0.38540    0.38850  -0.992    0.321    
-## PAT_DPT_GRPOther    0.86799    0.60825   1.427    0.154    
-## PAT_DPT_GRPSE       0.17955    0.35332   0.508    0.611    
-## PAT_DPT_GRPSW       0.26691    0.41847   0.638    0.524    
-## PAT_DPT_GRPUnknown  0.56324    1.18587   0.475    0.635    
-## PAT_AGE             0.10844    0.01015  10.683  &lt; 2e-16 ***
-## PAT_SEX_COD         0.02013    0.24396   0.083    0.934    
+##                  Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)      -5.90427    0.76022  -7.766 8.07e-15 ***
+## PAT_DPT_GRPNE     0.35838    0.39944   0.897    0.370    
+## PAT_DPT_GRPNW    -0.38534    0.38844  -0.992    0.321    
+## PAT_DPT_GRPOther  0.81660    0.56382   1.448    0.148    
+## PAT_DPT_GRPSE     0.17939    0.35326   0.508    0.612    
+## PAT_DPT_GRPSW     0.26669    0.41840   0.637    0.524    
+## PAT_AGE           0.10839    0.01015  10.682  &lt; 2e-16 ***
+## PAT_SEX_COD       0.02116    0.24393   0.087    0.931    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
 ##     Null deviance: 658.50  on 517  degrees of freedom
-## Residual deviance: 454.91  on 509  degrees of freedom
-## AIC: 472.91
+## Residual deviance: 454.96  on 510  degrees of freedom
+## AIC: 470.96
 ## 
 ## Number of Fisher Scoring iterations: 5</code></pre>
 <pre class="r"><code>#Recode prescription into binary variable 
@@ -625,7 +623,7 @@ prescription$pres &lt;- prescription$DRUG_ATC_C07
 prescription$pres &lt;- ifelse(str_detect(prescription$DRUG_ATC_C07, &quot;A10&quot;), 1, 0)
 prescription$pres &lt;- ifelse(is.na(prescription$DRUG_NAME), 0, prescription$pres)
 
-#Apply generalized linear model, currently using PAT_ID, but to replace with geographic area.
+#Apply generalized linear model
 g3 &lt;- glm(pres~PAT_DPT_GRP, data=prescription, family = &quot;binomial&quot;)
 summary(g3)</code></pre>
 <pre><code>## 
@@ -633,23 +631,22 @@ summary(g3)</code></pre>
 ## glm(formula = pres ~ PAT_DPT_GRP, family = &quot;binomial&quot;, data = prescription)
 ## 
 ## Coefficients:
-##                    Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)        -1.00873    0.03203 -31.491  &lt; 2e-16 ***
-## PAT_DPT_GRPNE       0.14018    0.04434   3.161  0.00157 ** 
-## PAT_DPT_GRPNW      -0.11115    0.04577  -2.428  0.01517 *  
-## PAT_DPT_GRPOther    0.09546    0.07252   1.316  0.18807    
-## PAT_DPT_GRPSE      -0.08245    0.04088  -2.017  0.04372 *  
-## PAT_DPT_GRPSW       0.01767    0.04641   0.381  0.70339    
-## PAT_DPT_GRPUnknown  0.16519    0.11650   1.418  0.15619    
+##                  Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)      -1.00873    0.03203 -31.491  &lt; 2e-16 ***
+## PAT_DPT_GRPNE     0.14018    0.04434   3.161  0.00157 ** 
+## PAT_DPT_GRPNW    -0.11115    0.04577  -2.428  0.01517 *  
+## PAT_DPT_GRPOther  0.11287    0.06474   1.744  0.08124 .  
+## PAT_DPT_GRPSE    -0.08245    0.04088  -2.017  0.04372 *  
+## PAT_DPT_GRPSW     0.01767    0.04641   0.381  0.70339    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
 ##     Null deviance: 34037  on 29390  degrees of freedom
-## Residual deviance: 33990  on 29384  degrees of freedom
+## Residual deviance: 33990  on 29385  degrees of freedom
 ##   (32585 observations deleted due to missingness)
-## AIC: 34004
+## AIC: 34002
 ## 
 ## Number of Fisher Scoring iterations: 4</code></pre>
 <pre class="r"><code>#Multivariate logistic regression
@@ -661,25 +658,24 @@ summary(g4)</code></pre>
 ##     data = prescription)
 ## 
 ## Coefficients:
-##                     Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)        -0.476158   0.085688  -5.557 2.75e-08 ***
-## PAT_DPT_GRPNE       0.129195   0.044481   2.904 0.003679 ** 
-## PAT_DPT_GRPNW      -0.105714   0.045835  -2.306 0.021090 *  
-## PAT_DPT_GRPOther    0.058679   0.072901   0.805 0.420870    
-## PAT_DPT_GRPSE      -0.076742   0.040927  -1.875 0.060779 .  
-## PAT_DPT_GRPSW       0.003727   0.046599   0.080 0.936258    
-## PAT_DPT_GRPUnknown  0.138403   0.117179   1.181 0.237551    
-## PAT_AGE            -0.005757   0.001042  -5.527 3.26e-08 ***
-## PAT_SEX_COD        -0.094640   0.027362  -3.459 0.000543 ***
+##                   Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)      -0.476374   0.085688  -5.559 2.71e-08 ***
+## PAT_DPT_GRPNE     0.129131   0.044481   2.903 0.003695 ** 
+## PAT_DPT_GRPNW    -0.105762   0.045835  -2.307 0.021031 *  
+## PAT_DPT_GRPOther  0.078380   0.065264   1.201 0.229761    
+## PAT_DPT_GRPSE    -0.076731   0.040927  -1.875 0.060817 .  
+## PAT_DPT_GRPSW     0.003646   0.046599   0.078 0.937630    
+## PAT_AGE          -0.005769   0.001041  -5.540 3.02e-08 ***
+## PAT_SEX_COD      -0.093847   0.027330  -3.434 0.000595 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
 ##     Null deviance: 34037  on 29390  degrees of freedom
-## Residual deviance: 33944  on 29382  degrees of freedom
+## Residual deviance: 33944  on 29383  degrees of freedom
 ##   (32585 observations deleted due to missingness)
-## AIC: 33962
+## AIC: 33960
 ## 
 ## Number of Fisher Scoring iterations: 4</code></pre>
 </div>
@@ -705,23 +701,22 @@ summary(l1)</code></pre>
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -50.946 -14.946  -0.051  15.054  48.054 
+## -52.722 -14.946  -0.051  15.054  48.054 
 ## 
 ## Coefficients:
-##                    Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)         51.9455     0.3363 154.440   &lt;2e-16 ***
-## PAT_DPT_GRPNE       -5.8676     0.5041 -11.640   &lt;2e-16 ***
-## PAT_DPT_GRPNW      -11.8343     0.5187 -22.817   &lt;2e-16 ***
-## PAT_DPT_GRPOther     6.3148     0.6077  10.391   &lt;2e-16 ***
-## PAT_DPT_GRPSE       -4.1699     0.4431  -9.412   &lt;2e-16 ***
-## PAT_DPT_GRPSW       -8.8947     0.5161 -17.234   &lt;2e-16 ***
-## PAT_DPT_GRPUnknown   2.5053     1.2923   1.939   0.0526 .  
+##                  Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)       51.9455     0.3364  154.41   &lt;2e-16 ***
+## PAT_DPT_GRPNE     -5.8676     0.5042  -11.64   &lt;2e-16 ***
+## PAT_DPT_GRPNW    -11.8343     0.5188  -22.81   &lt;2e-16 ***
+## PAT_DPT_GRPOther   5.7766     0.5773   10.01   &lt;2e-16 ***
+## PAT_DPT_GRPSE     -4.1699     0.4431   -9.41   &lt;2e-16 ***
+## PAT_DPT_GRPSW     -8.8947     0.5162  -17.23   &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 19.49 on 17257 degrees of freedom
-## Multiple R-squared:  0.06259,    Adjusted R-squared:  0.06226 
-## F-statistic:   192 on 6 and 17257 DF,  p-value: &lt; 2.2e-16</code></pre>
+## Residual standard error: 19.49 on 17258 degrees of freedom
+## Multiple R-squared:  0.06215,    Adjusted R-squared:  0.06188 
+## F-statistic: 228.8 on 5 and 17258 DF,  p-value: &lt; 2.2e-16</code></pre>
 <pre class="r"><code>#adjusted linear model 
 l2 &lt;- lm(NUM_HOSP~PAT_DPT_GRP+PAT_AGE+PAT_SEX_COD, data=hospitalization)
 summary(l2)</code></pre>
@@ -732,25 +727,24 @@ summary(l2)</code></pre>
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -52.741 -14.873   0.135  13.173  45.245 
+## -53.026 -14.862   0.159  13.170  45.237 
 ## 
 ## Coefficients:
-##                     Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)         35.70612    0.92560  38.576  &lt; 2e-16 ***
-## PAT_DPT_GRPNE       -5.50257    0.49916 -11.024  &lt; 2e-16 ***
-## PAT_DPT_GRPNW      -11.87487    0.51316 -23.141  &lt; 2e-16 ***
-## PAT_DPT_GRPOther     5.38273    0.60626   8.879  &lt; 2e-16 ***
-## PAT_DPT_GRPSE       -3.56044    0.43977  -8.096 6.05e-16 ***
-## PAT_DPT_GRPSW       -8.65209    0.51258 -16.880  &lt; 2e-16 ***
-## PAT_DPT_GRPUnknown   2.53232    1.28112   1.977   0.0481 *  
-## PAT_AGE              0.15157    0.01071  14.158  &lt; 2e-16 ***
-## PAT_SEX_COD          4.25377    0.30189  14.090  &lt; 2e-16 ***
+##                  Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)       35.6330     0.9251  38.520  &lt; 2e-16 ***
+## PAT_DPT_GRPNE     -5.5008     0.4992 -11.019  &lt; 2e-16 ***
+## PAT_DPT_GRPNW    -11.8749     0.5132 -23.138  &lt; 2e-16 ***
+## PAT_DPT_GRPOther   4.9788     0.5761   8.642  &lt; 2e-16 ***
+## PAT_DPT_GRPSE     -3.5574     0.4398  -8.089 6.44e-16 ***
+## PAT_DPT_GRPSW     -8.6497     0.5126 -16.873  &lt; 2e-16 ***
+## PAT_AGE            0.1524     0.0107  14.246  &lt; 2e-16 ***
+## PAT_SEX_COD        4.2647     0.3019  14.127  &lt; 2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 19.28 on 17255 degrees of freedom
-## Multiple R-squared:  0.08253,    Adjusted R-squared:  0.0821 
-## F-statistic:   194 on 8 and 17255 DF,  p-value: &lt; 2.2e-16</code></pre>
+## Residual standard error: 19.29 on 17256 degrees of freedom
+## Multiple R-squared:  0.08229,    Adjusted R-squared:  0.08191 
+## F-statistic:   221 on 7 and 17256 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 <div id="mixed-models" class="section level2">
 <h2>Mixed Models</h2>
@@ -939,79 +933,81 @@ anova(m1,m2)</code></pre>
 <h2>Sensitivity Analysis</h2>
 <pre class="r"><code># Adding the geographic departments to the equation to see if there is any change in the results. 
 m4 &lt;- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+(NUM_HOSP|PAT_ID), hospitalization, REML=0)</code></pre>
-<pre><code>## boundary (singular) fit: see help(&#39;isSingular&#39;)</code></pre>
+<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control$checkConv, :
+## Model failed to converge with max|grad| = 3.30871 (tol = 0.002, component 1)</code></pre>
+<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control$checkConv, : Model is nearly unidentifiable: very large eigenvalue
+##  - Rescale variables?</code></pre>
 <pre class="r"><code>m4</code></pre>
 <pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
 ## Formula: HOSP_DUR ~ PAT_DPT_GRP + NUM_HOSP + (NUM_HOSP | PAT_ID)
 ##    Data: hospitalization
 ##       AIC       BIC    logLik  deviance  df.resid 
-## 140078.84 140171.91 -70027.42 140054.84     17252 
+## 140070.47 140155.79 -70024.23 140048.47     17253 
 ## Random effects:
 ##  Groups   Name        Std.Dev. Corr 
-##  PAT_ID   (Intercept) 10.9323       
-##           NUM_HOSP     0.2119  -1.00
-##  Residual             13.7542       
+##  PAT_ID   (Intercept)  9.3509       
+##           NUM_HOSP     0.1781  -1.00
+##  Residual             13.7829       
 ## Number of obs: 17264, groups:  PAT_ID, 414
 ## Fixed Effects:
-##        (Intercept)       PAT_DPT_GRPNE       PAT_DPT_GRPNW    PAT_DPT_GRPOther  
-##           6.609281           -0.592492            1.170234           -0.294703  
-##      PAT_DPT_GRPSE       PAT_DPT_GRPSW  PAT_DPT_GRPUnknown            NUM_HOSP  
-##           0.007134           -0.235690           -0.395997           -0.001015  
-## optimizer (nloptwrap) convergence code: 0 (OK) ; 0 optimizer warnings; 1 lme4 warnings</code></pre>
+##      (Intercept)     PAT_DPT_GRPNE     PAT_DPT_GRPNW  PAT_DPT_GRPOther  
+##        6.6309032        -0.6455132         1.0008925        -0.3878075  
+##    PAT_DPT_GRPSE     PAT_DPT_GRPSW          NUM_HOSP  
+##       -0.0285302        -0.2996561         0.0004664  
+## optimizer (nloptwrap) convergence code: 0 (OK) ; 0 optimizer warnings; 2 lme4 warnings</code></pre>
 <pre class="r"><code>summary(m4)</code></pre>
 <pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
 ## Formula: HOSP_DUR ~ PAT_DPT_GRP + NUM_HOSP + (NUM_HOSP | PAT_ID)
 ##    Data: hospitalization
 ## 
 ##      AIC      BIC   logLik deviance df.resid 
-## 140078.8 140171.9 -70027.4 140054.8    17252 
+## 140070.5 140155.8 -70024.2 140048.5    17253 
 ## 
 ## Scaled residuals: 
 ##     Min      1Q  Median      3Q     Max 
-## -4.3745 -0.3850 -0.1669  0.1742 28.9520 
+## -4.1269 -0.3884 -0.1708  0.1719 28.9049 
 ## 
 ## Random effects:
 ##  Groups   Name        Variance  Std.Dev. Corr 
-##  PAT_ID   (Intercept) 119.51575 10.9323       
-##           NUM_HOSP      0.04492  0.2119  -1.00
-##  Residual             189.17846 13.7542       
+##  PAT_ID   (Intercept)  87.44012  9.3509       
+##           NUM_HOSP      0.03173  0.1781  -1.00
+##  Residual             189.96905 13.7829       
 ## Number of obs: 17264, groups:  PAT_ID, 414
 ## 
 ## Fixed effects:
-##                     Estimate Std. Error t value
-## (Intercept)         6.609281   0.779803   8.476
-## PAT_DPT_GRPNE      -0.592492   0.672762  -0.881
-## PAT_DPT_GRPNW       1.170234   0.614021   1.906
-## PAT_DPT_GRPOther   -0.294703   0.908210  -0.324
-## PAT_DPT_GRPSE       0.007134   0.590116   0.012
-## PAT_DPT_GRPSW      -0.235690   0.641415  -0.367
-## PAT_DPT_GRPUnknown -0.395997   1.375061  -0.288
-## NUM_HOSP           -0.001015   0.013502  -0.075
+##                    Estimate Std. Error t value
+## (Intercept)       6.6309032  0.7124112   9.308
+## PAT_DPT_GRPNE    -0.6455132  0.6243232  -1.034
+## PAT_DPT_GRPNW     1.0008925  0.5858339   1.708
+## PAT_DPT_GRPOther -0.3878075  0.7799036  -0.497
+## PAT_DPT_GRPSE    -0.0285302  0.5513924  -0.052
+## PAT_DPT_GRPSW    -0.2996561  0.6142272  -0.488
+## NUM_HOSP          0.0004664  0.0120524   0.039
 ## 
 ## Correlation of Fixed Effects:
 ##               (Intr) PAT_DPT_GRPNE PAT_DPT_GRPNW PAT_DPT_GRPO PAT_DPT_GRPSE
-## PAT_DPT_GRPNE -0.399                                                       
-## PAT_DPT_GRPNW -0.464  0.525                                                
-## PAT_DPT_GRPO  -0.283  0.356         0.389                                  
-## PAT_DPT_GRPSE -0.466  0.547         0.599         0.405                    
-## PAT_DPT_GRPSW -0.429  0.503         0.551         0.373        0.573       
-## PAT_DPT_GRPU  -0.190  0.235         0.257         0.174        0.267       
-## NUM_HOSP      -0.802 -0.018         0.014        -0.029       -0.007       
-##               PAT_DPT_GRPSW PAT_DPT_GRPU
-## PAT_DPT_GRPNE                           
-## PAT_DPT_GRPNW                           
-## PAT_DPT_GRPO                            
-## PAT_DPT_GRPSE                           
-## PAT_DPT_GRPSW                           
-## PAT_DPT_GRPU   0.246                    
-## NUM_HOSP      -0.006        -0.015      
+## PAT_DPT_GRPNE -0.413                                                       
+## PAT_DPT_GRPNW -0.482  0.518                                                
+## PAT_DPT_GRPO  -0.323  0.390         0.414                                  
+## PAT_DPT_GRPSE -0.483  0.551         0.587         0.441                    
+## PAT_DPT_GRPSW -0.443  0.494         0.528         0.396        0.560       
+## NUM_HOSP      -0.791 -0.017         0.034        -0.023        0.000       
+##               PAT_DPT_GRPSW
+## PAT_DPT_GRPNE              
+## PAT_DPT_GRPNW              
+## PAT_DPT_GRPO               
+## PAT_DPT_GRPSE              
+## PAT_DPT_GRPSW              
+## NUM_HOSP       0.011       
 ## optimizer (nloptwrap) convergence code: 0 (OK)
-## boundary (singular) fit: see help(&#39;isSingular&#39;)</code></pre>
+## Model failed to converge with max|grad| = 3.30871 (tol = 0.002, component 1)
+## Model is nearly unidentifiable: very large eigenvalue
+##  - Rescale variables?</code></pre>
 <pre class="r"><code># With all potential confounders 
 m5 &lt;- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+PAT_AGE+PAT_SEX_COD++(NUM_HOSP|PAT_ID), hospitalization, REML=0)</code></pre>
-<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control$checkConv, :
-## Model failed to converge with max|grad| = 4.89241 (tol = 0.002, component 1)</code></pre>
-<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control$checkConv, : Model is nearly unidentifiable: very large eigenvalue
+<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control$checkConv, : Model failed to converge with max|grad| = 0.119765 (tol = 0.002, component 1)
+
+## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control$checkConv, : Model is nearly unidentifiable: very large eigenvalue
 ##  - Rescale variables?</code></pre>
 <pre class="r"><code>m5</code></pre>
 <pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
@@ -1020,20 +1016,20 @@ m5 &lt;- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+PAT_AGE+PAT_SEX_COD++(NUM_HOSP|PAT_I
 ##     PAT_ID)
 ##    Data: hospitalization
 ##       AIC       BIC    logLik  deviance  df.resid 
-## 140065.70 140174.29 -70018.85 140037.70     17250 
+## 140064.06 140164.89 -70019.03 140038.06     17251 
 ## Random effects:
 ##  Groups   Name        Std.Dev. Corr 
-##  PAT_ID   (Intercept)  9.1369       
-##           NUM_HOSP     0.1763  -1.00
-##  Residual             13.7845       
+##  PAT_ID   (Intercept)  9.2798       
+##           NUM_HOSP     0.1793  -1.00
+##  Residual             13.7819       
 ## Number of obs: 17264, groups:  PAT_ID, 414
 ## Fixed Effects:
-##        (Intercept)       PAT_DPT_GRPNE       PAT_DPT_GRPNW    PAT_DPT_GRPOther  
-##          4.9762077          -0.5874314           0.9554980          -0.1694906  
-##      PAT_DPT_GRPSE       PAT_DPT_GRPSW  PAT_DPT_GRPUnknown            NUM_HOSP  
-##          0.1066938          -0.3365260          -1.0346220          -0.0001679  
-##            PAT_AGE         PAT_SEX_COD  
-##         -0.0005166           1.1773844  
+##      (Intercept)     PAT_DPT_GRPNE     PAT_DPT_GRPNW  PAT_DPT_GRPOther  
+##        5.0281827        -0.5829416         0.9716814        -0.3833098  
+##    PAT_DPT_GRPSE     PAT_DPT_GRPSW          NUM_HOSP           PAT_AGE  
+##        0.1057863        -0.3300205        -0.0001831        -0.0007958  
+##      PAT_SEX_COD  
+##        1.1493966  
 ## optimizer (nloptwrap) convergence code: 0 (OK) ; 0 optimizer warnings; 2 lme4 warnings</code></pre>
 <pre class="r"><code>summary(m5)</code></pre>
 <pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
@@ -1043,55 +1039,52 @@ m5 &lt;- lmer(HOSP_DUR~PAT_DPT_GRP+NUM_HOSP+PAT_AGE+PAT_SEX_COD++(NUM_HOSP|PAT_I
 ##    Data: hospitalization
 ## 
 ##      AIC      BIC   logLik deviance df.resid 
-## 140065.7 140174.3 -70018.8 140037.7    17250 
+## 140064.1 140164.9 -70019.0 140038.1    17251 
 ## 
 ## Scaled residuals: 
 ##     Min      1Q  Median      3Q     Max 
-## -4.0935 -0.3832 -0.1690  0.1706 28.8978 
+## -4.1203 -0.3832 -0.1681  0.1715 28.9027 
 ## 
 ## Random effects:
-##  Groups   Name        Variance Std.Dev. Corr 
-##  PAT_ID   (Intercept)  83.4830  9.1369       
-##           NUM_HOSP      0.0311  0.1763  -1.00
-##  Residual             190.0137 13.7845       
+##  Groups   Name        Variance  Std.Dev. Corr 
+##  PAT_ID   (Intercept)  86.11544  9.2798       
+##           NUM_HOSP      0.03214  0.1793  -1.00
+##  Residual             189.94123 13.7819       
 ## Number of obs: 17264, groups:  PAT_ID, 414
 ## 
 ## Fixed effects:
-##                      Estimate Std. Error t value
-## (Intercept)         4.9762077  1.2025530   4.138
-## PAT_DPT_GRPNE      -0.5874314  0.6199102  -0.948
-## PAT_DPT_GRPNW       0.9554980  0.5782581   1.652
-## PAT_DPT_GRPOther   -0.1694906  0.8549577  -0.198
-## PAT_DPT_GRPSE       0.1066938  0.5504430   0.194
-## PAT_DPT_GRPSW      -0.3365260  0.6036477  -0.557
-## PAT_DPT_GRPUnknown -1.0346220  1.3530835  -0.765
-## NUM_HOSP           -0.0001679  0.0120948  -0.014
-## PAT_AGE            -0.0005166  0.0127220  -0.041
-## PAT_SEX_COD         1.1773844  0.3538926   3.327
+##                    Estimate Std. Error t value
+## (Intercept)       5.0281827  1.2058081   4.170
+## PAT_DPT_GRPNE    -0.5829416  0.6232574  -0.935
+## PAT_DPT_GRPNW     0.9716814  0.5800462   1.675
+## PAT_DPT_GRPOther -0.3833098  0.7722032  -0.496
+## PAT_DPT_GRPSE     0.1057863  0.5528130   0.191
+## PAT_DPT_GRPSW    -0.3300205  0.6050008  -0.545
+## NUM_HOSP         -0.0001831  0.0122067  -0.015
+## PAT_AGE          -0.0007958  0.0127747  -0.062
+## PAT_SEX_COD       1.1493966  0.3516348   3.269
 ## 
 ## Correlation of Fixed Effects:
 ##               (Intr) PAT_DPT_GRPNE PAT_DPT_GRPNW PAT_DPT_GRPO PAT_DPT_GRPSE
 ## PAT_DPT_GRPNE -0.277                                                       
-## PAT_DPT_GRPNW -0.243  0.515                                                
-## PAT_DPT_GRPO  -0.233  0.354         0.371                                  
-## PAT_DPT_GRPSE -0.367  0.549         0.578         0.403                    
-## PAT_DPT_GRPSW -0.273  0.496         0.531         0.360        0.559       
-## PAT_DPT_GRPU  -0.060  0.218         0.240         0.155        0.240       
-## NUM_HOSP      -0.356 -0.020         0.033        -0.033       -0.010       
-## PAT_AGE       -0.694  0.031        -0.037         0.062        0.075       
-## PAT_SEX_COD   -0.490  0.035        -0.030         0.056        0.087       
-##               PAT_DPT_GRPSW PAT_DPT_GRPU NUM_HO PAT_AG
-## PAT_DPT_GRPNE                                         
-## PAT_DPT_GRPNW                                         
-## PAT_DPT_GRPO                                          
-## PAT_DPT_GRPSE                                         
-## PAT_DPT_GRPSW                                         
-## PAT_DPT_GRPU   0.229                                  
-## NUM_HOSP       0.003        -0.013                    
-## PAT_AGE        0.030         0.000       -0.139       
-## PAT_SEX_COD   -0.012        -0.112       -0.023  0.100
+## PAT_DPT_GRPNW -0.242  0.516                                                
+## PAT_DPT_GRPO  -0.221  0.391         0.416                                  
+## PAT_DPT_GRPSE -0.367  0.549         0.579         0.442                    
+## PAT_DPT_GRPSW -0.273  0.497         0.534         0.403        0.561       
+## NUM_HOSP      -0.360 -0.020         0.031        -0.034       -0.011       
+## PAT_AGE       -0.693  0.031        -0.037         0.052        0.076       
+## PAT_SEX_COD   -0.484  0.035        -0.032        -0.004        0.087       
+##               PAT_DPT_GRPSW NUM_HO PAT_AG
+## PAT_DPT_GRPNE                            
+## PAT_DPT_GRPNW                            
+## PAT_DPT_GRPO                             
+## PAT_DPT_GRPSE                            
+## PAT_DPT_GRPSW                            
+## NUM_HOSP       0.001                     
+## PAT_AGE        0.031        -0.138       
+## PAT_SEX_COD   -0.014        -0.021  0.097
 ## optimizer (nloptwrap) convergence code: 0 (OK)
-## Model failed to converge with max|grad| = 4.89241 (tol = 0.002, component 1)
+## Model failed to converge with max|grad| = 0.119765 (tol = 0.002, component 1)
 ## Model is nearly unidentifiable: very large eigenvalue
 ##  - Rescale variables?</code></pre>
 </div>
