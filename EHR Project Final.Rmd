@@ -172,10 +172,12 @@ diagnostic$PAT_SEX_COD <- as.character(diagnostic$PAT_SEX_COD)
 
 ```{r Table1}
 ## Using gtsummary
-diagnostic %>% dplyr::select("PAT_DPT_GRP", "PAT_AGE", "PAT_SEX_COD") %>% 
+demographic <- diagnostic %>% distinct(PAT_ID, PAT_SEX_COD, PAT_DPT_GRP, PAT_AGE)
+
+demographic %>% dplyr::select("PAT_DPT_GRP", "PAT_AGE", "PAT_SEX_COD") %>% 
   tbl_summary(by = "PAT_DPT_GRP")
 
-diagnostic %>% group_by(PAT_DPT_GRP) %>% 
+demographic %>% group_by(PAT_DPT_GRP) %>% 
   summarize(minAge = min(PAT_AGE), maxAge = max(PAT_AGE))
 
 ## OR using kable
